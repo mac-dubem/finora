@@ -1,12 +1,13 @@
+import 'package:flutter/material.dart';
 import 'package:finora/constant.dart';
 import 'package:finora/model/transaction.dart';
-import 'package:flutter/material.dart';
+
 // import 'package:intl/intl.dart';
 
 class HistoryContainer extends StatelessWidget {
   const HistoryContainer({required this.transaction, super.key});
 
-  final Transaction transaction;
+  final TransactionModel transaction;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +32,7 @@ class HistoryContainer extends StatelessWidget {
                     transaction.category.toString().toUpperCase(),
                     style: TextStyle(fontSize: 12),
                   ),
-                  GestureDetector(child: Icon(Icons.cancel, color: Colors.red)),
+                  // GestureDetector(child: Icon(Icons.cancel, color: Colors.red)),
                 ],
               ),
               Row(
@@ -39,9 +40,11 @@ class HistoryContainer extends StatelessWidget {
                 children: [
                   Text(transaction.description.toString()),
                   Text(
-                    "${transaction.type == "expense" ? "-" : "+"}₦${transaction.amount.toStringAsFixed(2)}",
+                    "${transaction.type == "expense" || transaction.type == "loan" ? "-" : "+"}₦${transaction.amount.toStringAsFixed(2)}",
                     style: TextStyle(
-                      color: transaction.type == "expense"
+                      color:
+                          transaction.type == "expense" ||
+                              transaction.type == "loan"
                           ? Colors.red
                           : Colors.green,
                       fontWeight: FontWeight.bold,

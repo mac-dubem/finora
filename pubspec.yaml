@@ -35,7 +35,14 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   intl: ^0.20.2
-  dropdown_button2: ^2.3.9
+  path_provider: ^2.1.5
+  csv: ^6.0.0
+  pdf: ^3.11.3
+  excel: ^4.0.6
+  currency_picker: ^2.0.21
+  path: ^1.9.1
+  sqflite: ^2.4.2
+  
 
 dev_dependencies:
   flutter_test:

@@ -1,13 +1,17 @@
+import 'package:finora/services/datebase_service.dart';
+import 'package:flutter/material.dart';
 import 'package:finora/constant.dart';
 import 'package:finora/model/manager.dart';
 // import 'package:finora/model/sheet.dart' ;
 import 'package:finora/model/transaction.dart';
+import 'package:finora/screens/setting.dart';
 import 'package:finora/widget/action_button.dart';
 import 'package:finora/widget/dropdown_widget.dart';
 import 'package:finora/widget/history_container.dart';
 import 'package:finora/widget/input_widget.dart';
+import 'package:finora/widget/outward_container_widget.dart';
 // import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+
 import 'package:intl/intl.dart';
 
 class FinoraScreen extends StatefulWidget {
@@ -18,36 +22,38 @@ class FinoraScreen extends StatefulWidget {
 }
 
 class _FinoraScreenState extends State<FinoraScreen> {
-  // =================================================================
+  // ================== APP TAB BAR =====================================
   int selectedTab = 0;
   List<String> appTab = ["Add Transaction", "Loan", "History"];
-  // ==================================================================
+  // ====================================================================
 
-  // ==================== DROPDROWN LIST ==============================
-  // String? selectedType;
-  List<String> typeDropdown = ["Expense", "Income ", "Loan", "Repayment"];
-
-  // String? selectedCategory;
-  final List<String> categoryDropdown = [
-    "Foods & Dining",
-    "Transportation",
-    "Shopping",
-    "Bills & Utilities",
-    "Entertainment",
-    "Health & Medical",
-    "Other",
-  ];
-
-  // ==================================================================
+  // ====================================================================
   final TransactionManager manager = TransactionManager();
   // final List<Map<String, dynamic>> transactions = [];
-  // final List<Transaction> transactions = [];
+  // final List<TransactionModel> transactions = [];
 
   final descController = TextEditingController();
   final amountController = TextEditingController();
   String? selectedType;
   String? selectedCategory;
   DateTime? selectedDate;
+  // ===========================================================================
+
+  // ================== DATABASE SERVER =========================================
+  final DBService dbService = DBService.instance;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    await manager.loadTransactions();
+    setState(() {});
+  }
+  // ==============================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +63,18 @@ class _FinoraScreenState extends State<FinoraScreen> {
           "Expense Tracker",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -68,7 +86,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
               // height: 250,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.blue[300],
+                color: const Color(0xFF192C6C),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Padding(
@@ -84,9 +102,11 @@ class _FinoraScreenState extends State<FinoraScreen> {
                       style: TextStyle(fontSize: 15, color: Colors.white),
                     ),
                     Text(
-                      "\$146,500.00",
+                      "₦${manager.balance.toStringAsFixed(2)}",
+                      // "\$146,500.00",
                       // "₦${balance.toStringAsFixed(2)"}
                       style: TextStyle(
+                        color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 30,
                       ),
@@ -94,15 +114,17 @@ class _FinoraScreenState extends State<FinoraScreen> {
 
                     contaninerIncomeText(
                       title1: "Income",
-                      amount1: "\$150,000.00",
+                      amount1: "₦${manager.totalIncome.toStringAsFixed(2)}",
+
                       title2: "Expenses",
-                      amount2: "\$3,500",
+                      amount2: "₦${manager.totalExpense.toStringAsFixed(2)}",
                     ),
                     contaninerIncomeText(
-                      title1: "Loans Given",
-                      amount1: "\$0.00",
+                      title1: "Loans Paid",
+                      amount1:
+                          " ₦${manager.totalLoanRepayment.toStringAsFixed(2)}",
                       title2: "Loans Owed",
-                      amount2: "\$0.00",
+                      amount2: " ₦${manager.totalLoan.toStringAsFixed(2)}",
                     ),
                   ],
                 ),
@@ -170,7 +192,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
                   sectionHeader(title: "Type"),
                   DropDownWidget(
                     selectedDrop: selectedType,
-                    dropdownList: typeDropdown,
+                    dropdownList: ["Expense", "Income ", "Loan", "Repayment"],
                     onChanged: (val) {
                       setState(() {
                         selectedType = val;
@@ -193,7 +215,15 @@ class _FinoraScreenState extends State<FinoraScreen> {
                   DropDownWidget(
                     selectedDrop: selectedCategory,
                     hintText: "Select Category",
-                    dropdownList: categoryDropdown,
+                    dropdownList: [
+                      "Foods & Dining",
+                      "Transportation",
+                      "Shopping",
+                      "Bills & Utilities",
+                      "Entertainment",
+                      "Health & Medical",
+                      "Other",
+                    ],
                     onChanged: (val) {
                       setState(() {
                         selectedCategory = val;
@@ -262,112 +292,112 @@ class _FinoraScreenState extends State<FinoraScreen> {
                   // ACTION BUTTON
                   // =================================================================================
                   ActionButton(
-                    onPress: () {
+                    onPress: () async {
                       // Navigator.push(
                       //   context,
                       //   MaterialPageRoute(builder: (context) => ExpenseApp()),
                       // );
-                      if (amountController.text.isEmpty || selectedType == null) return;
-                      setState(() {
-                        manager.transactions.add(
-                          Transaction(
-                            amount: double.tryParse(amountController.text) ?? 0,
-                            type: selectedType?.toLowerCase().trim() ?? '',
-                            category: selectedCategory ?? '',
-                            description: descController.text,
-                            date: selectedDate ?? DateTime.now(),
+                      if (amountController.text.isEmpty ||
+                          selectedType == null ||
+                          selectedCategory == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Colors.white,
+                            content: Text("Please fill all fields",style: TextStyle(color: Colors.red),),
                           ),
                         );
-                        // Optionally clear fields after adding
-                        amountController.clear();
-                        descController.clear();
-                        selectedType = null;
-                        selectedCategory = null;
-                        selectedDate = null;
-                      });
+                        return;
+                      }
+                      final newTransaction = TransactionModel(
+                        category: selectedCategory ?? '',
+                        description: descController.text,
+                        amount: double.tryParse(amountController.text) ?? 0,
+                        type: selectedType?.toLowerCase().trim() ?? '',
+                        date: selectedDate ?? DateTime.now(),
+                      );
+
+                      await manager.addTransaction(newTransaction);
+                      await _loadTransactions();
+                      // Optionally clear fields after adding
+                      amountController.clear();
+                      descController.clear();
+                      selectedType = null;
+                      selectedCategory = null;
+                      selectedDate = null;
                     },
                   ),
                   // ==============================================================================
                 ],
               ),
+            // =================================================================================
+            // LOAN SECTION
+            // ================================================================================
+            if (selectedTab == 1)
+              Column(
+                children: [
+                  InOutwardContainter(
+                    manager: manager,
+                    inwardTitle: "Loan Repayment",
+                    outwardTitle: "Loan Owed",
+                    inwardAmount:
+                        " ₦${manager.totalLoanRepayment.toStringAsFixed(2)}",
+                    outwardAmount: " ₦${manager.totalLoan.toStringAsFixed(2)}",
+                    balanceAmount:
+                        "₦${manager.outstandingLoan.toStringAsFixed(2)}",
+                  ),
+                  ...manager.transactions
+                      .where(
+                        (val) => val.type == "loan" || val.type == "repayment",
+                      )
+                      .map((val) {
+                        return HistoryContainer(transaction: val);
+                      }),
+                ],
+              ),
+
+            // ================================================================================
             // ==================================================================================
             // HISTORY SECTION
             // =================================================================================
             if (selectedTab == 2)
               Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Container(
-                      width: double.infinity,
-                      // height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "This Month",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Income:"),
-                                Text("₦${manager.totalIncome.toStringAsFixed(2)}", style: inwardTextStyle),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Expenses:"),
-                                Text("₦${manager.totalExpense.toStringAsFixed(2)}", style: outwardTextStyle),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Net:",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Text("₦${manager.balance.toStringAsFixed(2)}", style: inwardTextStyle),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  InOutwardContainter(
+                    manager: manager,
+                    inwardTitle: "Income:",
+                    outwardTitle: "Expense:",
+                    inwardAmount: "₦${manager.totalIncome.toStringAsFixed(2)}",
+                    outwardAmount:
+                        "₦${manager.totalExpense.toStringAsFixed(2)}",
+                    balanceAmount: "₦${manager.balance.toStringAsFixed(2)}",
                   ),
-                  ...manager.transactions.map((val) {
-                    return HistoryContainer(transaction: val);
-                  }),
+                  ...manager.transactions
+                      .where(
+                        (val) => val.type == "income" || val.type == "expense",
+                      )
+                      .map((val) {
+                        return HistoryContainer(transaction: val);
+                      }),
                 ],
               ),
-            // ==================================================================================
+            // =============================================================================
           ],
         ),
       ),
     );
   }
 
-  // ==============================================================================================
+  // ========================= Helper for section headers ==================================
   Padding sectionHeader({required String title}) {
     return Padding(
       padding: const EdgeInsets.only(top: 12.0),
       child: Text(title.toUpperCase(), style: sectionTitleStyle),
     );
   }
-  // ============================================================================================
+  // ========================================================================================
 
   // ========================================================================================
+  // HELPS FOR THE INCOME AND EXPENSES CONTAINER ROW
   //=========================================================================================
   Row contaninerIncomeText({
     required String title1,
@@ -380,7 +410,13 @@ class _FinoraScreenState extends State<FinoraScreen> {
       children: [
         Column(
           children: [
-            Text(title1, style: TextStyle(color: Colors.white)),
+            Text(
+              title1,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
             Text(
               amount1,
               style: TextStyle(
@@ -390,10 +426,16 @@ class _FinoraScreenState extends State<FinoraScreen> {
             ),
           ],
         ),
-        // =====================================================================
+        // ===================================================================================
         Column(
           children: [
-            Text(title2, style: TextStyle(color: Colors.white)),
+            Text(
+              title2,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
+            ),
             Text(
               amount2,
               style: TextStyle(
@@ -406,6 +448,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
       ],
     );
   }
+  // =============================================================================================
 
   // MY Calculate totals
   // double get totalIncome => transactions
