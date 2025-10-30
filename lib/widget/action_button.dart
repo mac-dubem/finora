@@ -1,3 +1,4 @@
+import 'package:finora/constant.dart';
 import 'package:flutter/material.dart';
 
 class ActionButton extends StatelessWidget {
@@ -17,7 +18,8 @@ class ActionButton extends StatelessWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: Colors.blue,
+            color: kFocusButtonColor
+            //  color: Color(0xFF0D47A1),
           ),
           child: Center(
             child: Text(

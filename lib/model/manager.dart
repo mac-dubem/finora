@@ -1,5 +1,5 @@
 import 'package:finora/model/transaction.dart';
-import 'package:finora/services/datebase_service.dart';
+import 'package:finora/services/database_service.dart';
 
 class TransactionManager {
   final List<TransactionModel> transactions = [];
@@ -13,22 +13,42 @@ class TransactionManager {
     // ================================================================
   // ADD TRANSACTION (saves to Firebase and updates local list)
   // ================================================================
+  // Future<void> addTransaction(TransactionModel transaction) async {
+  //   // Add locally
+  //   transactions.add(transaction);
+  //   // Save to Firebase
+  //   await dbService.insertTransaction(transaction);
+  // }
+  
+  Future<void> addTransactionForSheet(TransactionModel transaction, String sheetId) async {
+    final txWithSheet = TransactionModel(
+      category: transaction.category,
+      description: transaction.description,
+      amount: transaction.amount,
+      type: transaction.type,
+      date: transaction.date,
+      sheetId: sheetId,
+    );
+    transactions.add(txWithSheet);
+    await dbService.insertTransaction(txWithSheet);
+  }
+
+  // legacy add (keeps backward compatibility)
   Future<void> addTransaction(TransactionModel transaction) async {
-    // Add locally
     transactions.add(transaction);
-    // Save to Firebase
     await dbService.insertTransaction(transaction);
   }
 
   // ================================================================
   // LOAD TRANSACTIONS (fetch from Firebase)
   // ================================================================
-  Future<void> loadTransactions() async {
-    final fetched = await dbService.getTransactions();
+  Future<void> loadTransactionsForSheet(String sheetId) async {
+    final fetched = await dbService.getTransactionsForSheet(sheetId);
     transactions
       ..clear()
       ..addAll(fetched);
   }
+
 
   // ================================================================
   // MY APP CALCULATION

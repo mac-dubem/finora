@@ -21,8 +21,18 @@ class DBService {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
+          await db.execute('''
+          CREATE TABLE sheets(
+            id TEXT PRIMARY KEY,
+            title TEXT,
+            currency TEXT,
+            amount TEXT,
+            date TEXT
+          )
+        ''');
+
         await db.execute('''
           CREATE TABLE transactions(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,6 +43,13 @@ class DBService {
             date TEXT
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          // add the new column for existing DBs
+          await db.execute('ALTER TABLE transactions ADD COLUMN sheetId TEXT');
+        }
+        // add future migrations here
       },
     );
   }
@@ -53,6 +70,33 @@ class DBService {
       orderBy: "date DESC",
     );
     return List.generate(maps.length, (i) => TransactionModel.fromMap(maps[i]));
+  }
+
+    // New: get transactions for a specific sheetId
+  Future<List<TransactionModel>> getTransactionsForSheet(String sheetId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      "transactions",
+      where: "sheetId = ?",
+      whereArgs: [sheetId],
+      orderBy: "date DESC",
+    );
+    return List.generate(maps.length, (i) => TransactionModel.fromMap(maps[i]));
+  }
+
+  // New: create and fetch sheets
+  Future<int> createSheet(Map<String, dynamic> sheet) async {
+    final db = await database;
+    return await db.insert(
+      "sheets",
+      sheet,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getSheets() async {
+    final db = await database;
+    return await db.query("sheets", orderBy: "date DESC");
   }
 
   // Future<int> deleteTransaction(int id) async {

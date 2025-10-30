@@ -5,20 +5,24 @@ import 'package:finora/model/transaction.dart';
 // import 'package:intl/intl.dart';
 
 class HistoryContainer extends StatelessWidget {
-  const HistoryContainer({required this.transaction, super.key});
+  const HistoryContainer({
+    required this.transaction,
+    // required this.currency,
+    super.key,
+  });
 
   final TransactionModel transaction;
+  // final String currency;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Container(
-        // height: 100,
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(width: 1, color: const Color(0xFFE0E0E0)),
+          border: Border.all(width: 1, color: myAppTheme.kContainerColor),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
@@ -30,7 +34,10 @@ class HistoryContainer extends StatelessWidget {
                 children: [
                   Text(
                     transaction.category.toString().toUpperCase(),
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: myAppTheme.kContainerTextColor,
+                    ),
                   ),
                   // GestureDetector(child: Icon(Icons.cancel, color: Colors.red)),
                 ],
@@ -38,7 +45,10 @@ class HistoryContainer extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(transaction.description.toString()),
+                  Text(
+                    transaction.description.toString(),
+                    style: TextStyle(color: myAppTheme.kContainerTextColor),
+                  ),
                   Text(
                     "${transaction.type == "expense" || transaction.type == "loan" ? "-" : "+"}₦${transaction.amount.toStringAsFixed(2)}",
                     style: TextStyle(

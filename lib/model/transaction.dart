@@ -6,6 +6,7 @@ class TransactionModel {
   final double amount;  // money value
   final String type;    // "income" or "expense"
   final DateTime date;  // when it happened
+    final String? sheetId; // new: id of sheet this transaction belongs to
 
   TransactionModel({
     required this.category,
@@ -13,6 +14,8 @@ class TransactionModel {
     required this.amount,
     required this.type,
     required this.date,
+    this.sheetId,
+    
   });
 
    Map<String, dynamic> toMap() {
@@ -23,6 +26,7 @@ class TransactionModel {
       "category": category,
       "description": description,
       "date": date.toIso8601String(),
+       "sheetId": sheetId,
     };
   }
 
@@ -34,6 +38,7 @@ class TransactionModel {
       category: map["category"],
       description: map["description"],
       date: DateTime.parse(map["date"]),
+      sheetId: map["sheetId"] as String?,
     );
   }
 }

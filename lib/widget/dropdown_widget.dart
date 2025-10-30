@@ -1,3 +1,4 @@
+import 'package:finora/constant.dart';
 import 'package:flutter/material.dart';
 
 class DropDownWidget extends StatelessWidget {
@@ -7,7 +8,6 @@ class DropDownWidget extends StatelessWidget {
     required this.dropdownList,
     required this.onChanged,
     required this.hintText,
-
   });
 
   final String? selectedDrop;
@@ -21,16 +21,28 @@ class DropDownWidget extends StatelessWidget {
       height: 40,
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: myAppTheme.kContainerColor,
         borderRadius: BorderRadius.circular(10),
         // border: Border.all(color: Colors.black, width: 1)
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton(
-          style: TextStyle(fontSize: 15, color: Colors.black),
+          style: TextStyle(
+            fontSize: 15,
+            // color: Colors.red,
+            color: myAppTheme.kContainerTextColor,
+          ),
+         dropdownColor: myAppTheme.kContainerColor,
+        // focusColor: Colors.black,
           isExpanded: true,
           value: selectedDrop,
-          hint: Text(hintText),
+          hint: Text(
+            hintText,
+            style: TextStyle(
+              color: myAppTheme.kContainerTextColor,
+              // color: Colors.white
+            ),
+          ),
           items: dropdownList.map((String type) {
             return DropdownMenuItem<String>(value: type, child: Text(type));
           }).toList(),

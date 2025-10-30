@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:currency_picker/currency_picker.dart';
+import 'package:finora/constant.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -28,14 +29,34 @@ class _SettingPageState extends State<SettingPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(CupertinoIcons.sun_max_fill, color: Colors.grey[500]),
-                  Text("Dark Mood", style: TextStyle(fontSize: 15)),
+                  Text(
+                    "Dark Mood",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: myAppTheme.kContainerTextColor,
+                    ),
+                  ),
                   Spacer(),
 
-                  // Switch(value: isDark, onChanged: (val) {})
+                  SizedBox(
+                    height: 20,
+                    child: Switch(
+                      value: myAppTheme.isWhite,
+                      onChanged: (val) {
+                        setState(() {
+                          myAppTheme.setIsWhite =
+                              !myAppTheme.isWhite; // change theme when switched
+                        });
+                        //  await _loadTransactions();
+                        print(myAppTheme.isWhite.toString());
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),
-            titleSection(title: "Currency"),
+            SizedBox(height: 10),
+            // titleSection(title: "Currency"),
             GestureDetector(
               onTap: () {
                 showCurrencyPicker(
@@ -53,7 +74,13 @@ class _SettingPageState extends State<SettingPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Icon(CupertinoIcons.flag, color: Colors.grey[500]),
-                    Text("Select Currency", style: TextStyle(fontSize: 15)),
+                    Text(
+                      "Select Currency",
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: myAppTheme.kContainerTextColor,
+                      ),
+                    ),
                     Spacer(),
                     Icon(CupertinoIcons.right_chevron, size: 16),
                   ],
@@ -69,7 +96,13 @@ class _SettingPageState extends State<SettingPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(CupertinoIcons.info_circle, color: Colors.grey[500]),
-                  Text("App Version", style: TextStyle(fontSize: 15)),
+                  Text(
+                    "App Version",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: myAppTheme.kContainerTextColor,
+                    ),
+                  ),
                   Spacer(),
 
                   Text(
@@ -106,7 +139,8 @@ class _SettingPageState extends State<SettingPage> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadiusGeometry.all(Radius.circular(10)),
-        color: Colors.grey[100],
+        color: myAppTheme.kContainerColor,
+        // color: Colors.grey[100],
       ),
 
       child: child,

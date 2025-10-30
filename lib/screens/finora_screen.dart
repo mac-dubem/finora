@@ -1,21 +1,21 @@
-import 'package:finora/services/datebase_service.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:finora/constant.dart';
+// import 'package:flutter/cupertino.dart';
 import 'package:finora/model/manager.dart';
-// import 'package:finora/model/sheet.dart' ;
-import 'package:finora/model/transaction.dart';
 import 'package:finora/screens/setting.dart';
+import 'package:finora/model/transaction.dart';
+import 'package:finora/widget/input_widget.dart';
 import 'package:finora/widget/action_button.dart';
 import 'package:finora/widget/dropdown_widget.dart';
 import 'package:finora/widget/history_container.dart';
-import 'package:finora/widget/input_widget.dart';
+import 'package:finora/services/database_service.dart';
 import 'package:finora/widget/outward_container_widget.dart';
-// import 'package:flutter/cupertino.dart';
-
-import 'package:intl/intl.dart';
 
 class FinoraScreen extends StatefulWidget {
-  const FinoraScreen({super.key});
+  final Map<String, dynamic>?
+  sheetInfo; // ✅ receives sheet info from HomeScreen
+  const FinoraScreen({super.key, this.sheetInfo});
 
   @override
   State<FinoraScreen> createState() => _FinoraScreenState();
@@ -29,9 +29,6 @@ class _FinoraScreenState extends State<FinoraScreen> {
 
   // ====================================================================
   final TransactionManager manager = TransactionManager();
-  // final List<Map<String, dynamic>> transactions = [];
-  // final List<TransactionModel> transactions = [];
-
   final descController = TextEditingController();
   final amountController = TextEditingController();
   String? selectedType;
@@ -45,18 +42,20 @@ class _FinoraScreenState extends State<FinoraScreen> {
   @override
   void initState() {
     super.initState();
-
     _loadTransactions();
   }
 
   Future<void> _loadTransactions() async {
-    await manager.loadTransactions();
+    final sheetId = widget.sheetInfo?['id'] ?? '';
+    await manager.loadTransactionsForSheet(sheetId);
     setState(() {});
   }
-  // ==============================================================================
+  // ===============================================================================
 
   @override
   Widget build(BuildContext context) {
+    final sheetCurrency = widget.sheetInfo?['currency'] ?? "₦";
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -86,8 +85,22 @@ class _FinoraScreenState extends State<FinoraScreen> {
               // height: 250,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFF192C6C),
                 borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF2563EB), // top darker
+                    const Color(0xFF1E3A8A), // middle dark
+                    const Color(0xFF192C6C), // bottom darker
+                  ],
+
+                  // colors: [0xFF2563EB
+                  //   const Color(0xFF192C6C), // top darker
+                  //   const Color(0xFF1E3A8A),// middle dark
+                  //   const Color(0xFF3B82F6), // bottom darker
+                  // ],
+                ),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -99,10 +112,14 @@ class _FinoraScreenState extends State<FinoraScreen> {
                   children: [
                     Text(
                       "Current Balance",
-                      style: TextStyle(fontSize: 15, color: Colors.white),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
-                      "₦${manager.balance.toStringAsFixed(2)}",
+                      "$sheetCurrency${manager.balance.toStringAsFixed(2)}",
                       // "\$146,500.00",
                       // "₦${balance.toStringAsFixed(2)"}
                       style: TextStyle(
@@ -114,17 +131,20 @@ class _FinoraScreenState extends State<FinoraScreen> {
 
                     contaninerIncomeText(
                       title1: "Income",
-                      amount1: "₦${manager.totalIncome.toStringAsFixed(2)}",
+                      amount1:
+                          "$sheetCurrency${manager.totalIncome.toStringAsFixed(2)}",
 
                       title2: "Expenses",
-                      amount2: "₦${manager.totalExpense.toStringAsFixed(2)}",
+                      amount2:
+                          "$sheetCurrency${manager.totalExpense.toStringAsFixed(2)}",
                     ),
                     contaninerIncomeText(
                       title1: "Loans Paid",
                       amount1:
-                          " ₦${manager.totalLoanRepayment.toStringAsFixed(2)}",
+                          " $sheetCurrency${manager.totalLoanRepayment.toStringAsFixed(2)}",
                       title2: "Loans Owed",
-                      amount2: " ₦${manager.totalLoan.toStringAsFixed(2)}",
+                      amount2:
+                          " $sheetCurrency${manager.totalLoan.toStringAsFixed(2)}",
                     ),
                   ],
                 ),
@@ -139,7 +159,8 @@ class _FinoraScreenState extends State<FinoraScreen> {
               height: 50,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                // color: const Color(0xFFE0E0E0),
+                color: myAppTheme.kContainerColor,
                 borderRadius: BorderRadius.circular(30),
               ),
               child: Padding(
@@ -157,7 +178,6 @@ class _FinoraScreenState extends State<FinoraScreen> {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          // color: Colors.red
                         ),
                         child: Center(
                           child: Text(
@@ -165,8 +185,8 @@ class _FinoraScreenState extends State<FinoraScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               color: isSelected
-                                  ? Colors.blue[900]
-                                  : Colors.black,
+                                  ? myAppTheme.kHighlightColor
+                                  : myAppTheme.kContainerTextColor,
                               fontWeight: isSelected
                                   ? FontWeight.w800
                                   : FontWeight.normal,
@@ -192,7 +212,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
                   sectionHeader(title: "Type"),
                   DropDownWidget(
                     selectedDrop: selectedType,
-                    dropdownList: ["Expense", "Income ", "Loan", "Repayment"],
+                    dropdownList: ["Expense", "Income", "Loan", "Repayment"],
                     onChanged: (val) {
                       setState(() {
                         selectedType = val;
@@ -200,8 +220,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
                     },
                     hintText: "Select Type",
                   ),
-                  // =============================================================
-                  // Text("Amount (\$)", style: sectionTitleStyle),
+                  // ============================================================
                   sectionHeader(title: "Amount (\$)"),
                   InputWidget(
                     hint: "Enter Amount",
@@ -210,7 +229,6 @@ class _FinoraScreenState extends State<FinoraScreen> {
                   ),
 
                   // ==============================================================
-                  // Text("Category", style: sectionTitleStyle),
                   sectionHeader(title: "Category"),
                   DropDownWidget(
                     selectedDrop: selectedCategory,
@@ -266,7 +284,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
                       height: 35,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFDCDBDB),
+                        color: myAppTheme.kContainerColor,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
@@ -281,7 +299,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
-                            color: Colors.blue,
+                            color: myAppTheme.kHighlightColor,
                           ),
                         ),
                       ),
@@ -302,22 +320,40 @@ class _FinoraScreenState extends State<FinoraScreen> {
                           selectedCategory == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
+                            // behavior: SnackBarBehavior.floating,
                             backgroundColor: Colors.white,
-                            content: Text("Please fill all fields",style: TextStyle(color: Colors.red),),
+                            content: Text(
+                              "Please fill all fields",
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ),
                         );
                         return;
                       }
+                      final sheetId = widget.sheetInfo?['id'] as String? ?? '';
+
                       final newTransaction = TransactionModel(
                         category: selectedCategory ?? '',
                         description: descController.text,
                         amount: double.tryParse(amountController.text) ?? 0,
                         type: selectedType?.toLowerCase().trim() ?? '',
                         date: selectedDate ?? DateTime.now(),
+                        sheetId: sheetId,
                       );
 
-                      await manager.addTransaction(newTransaction);
-                      await _loadTransactions();
+                      if (sheetId.isNotEmpty) {
+                        await manager.addTransactionForSheet(
+                          newTransaction,
+                          sheetId,
+                        );
+                        await manager.loadTransactionsForSheet(sheetId);
+                      } else {
+                        await manager.addTransaction(newTransaction);
+                        await manager.loadTransactionsForSheet(sheetId);
+                      }
+
+                      // await manager.addTransaction(newTransaction);
+
                       // Optionally clear fields after adding
                       amountController.clear();
                       descController.clear();
@@ -340,10 +376,11 @@ class _FinoraScreenState extends State<FinoraScreen> {
                     inwardTitle: "Loan Repayment",
                     outwardTitle: "Loan Owed",
                     inwardAmount:
-                        " ₦${manager.totalLoanRepayment.toStringAsFixed(2)}",
-                    outwardAmount: " ₦${manager.totalLoan.toStringAsFixed(2)}",
+                        " $sheetCurrency${manager.totalLoanRepayment.toStringAsFixed(2)}",
+                    outwardAmount:
+                        " $sheetCurrency${manager.totalLoan.toStringAsFixed(2)}",
                     balanceAmount:
-                        "₦${manager.outstandingLoan.toStringAsFixed(2)}",
+                        "$sheetCurrency${manager.outstandingLoan.toStringAsFixed(2)}",
                   ),
                   ...manager.transactions
                       .where(
@@ -366,10 +403,12 @@ class _FinoraScreenState extends State<FinoraScreen> {
                     manager: manager,
                     inwardTitle: "Income:",
                     outwardTitle: "Expense:",
-                    inwardAmount: "₦${manager.totalIncome.toStringAsFixed(2)}",
+                    inwardAmount:
+                        "$sheetCurrency${manager.totalIncome.toStringAsFixed(2)}",
                     outwardAmount:
-                        "₦${manager.totalExpense.toStringAsFixed(2)}",
-                    balanceAmount: "₦${manager.balance.toStringAsFixed(2)}",
+                        "$sheetCurrency${manager.totalExpense.toStringAsFixed(2)}",
+                    balanceAmount:
+                        "$sheetCurrency${manager.balance.toStringAsFixed(2)}",
                   ),
                   ...manager.transactions
                       .where(
@@ -391,7 +430,13 @@ class _FinoraScreenState extends State<FinoraScreen> {
   Padding sectionHeader({required String title}) {
     return Padding(
       padding: const EdgeInsets.only(top: 12.0),
-      child: Text(title.toUpperCase(), style: sectionTitleStyle),
+      child: Text(
+        title.toUpperCase(),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: myAppTheme.kSectionTitleColor,
+        ),
+      ),
     );
   }
   // ========================================================================================
@@ -420,7 +465,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
             Text(
               amount1,
               style: TextStyle(
-                color: Colors.green[700],
+                color: const Color(0xFF75FF7A),
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -439,7 +484,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
             Text(
               amount2,
               style: TextStyle(
-                color: Colors.red[700],
+                color: const Color.fromARGB(255, 255, 90, 78),
                 fontWeight: FontWeight.bold,
               ),
             ),

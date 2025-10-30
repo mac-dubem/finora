@@ -26,9 +26,8 @@ class InOutwardContainter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Container(
         width: double.infinity,
-        // height: 100,
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: myAppTheme.kContainerColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Padding(
@@ -38,13 +37,13 @@ class InOutwardContainter extends StatelessWidget {
             children: [
               Text(
                 "This Month",
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: myAppTheme.kContainerTextColor) ,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    inwardTitle,
+                    inwardTitle, style: TextStyle(color: myAppTheme.kContainerTextColor),
                     // "Income:"
                   ),
                   Text(
@@ -59,6 +58,7 @@ class InOutwardContainter extends StatelessWidget {
                 children: [
                   Text(
                     outwardTitle,
+                    style: TextStyle(color: myAppTheme.kContainerTextColor)
                     // "Expenses:"
                   ),
                   Text(
@@ -68,18 +68,29 @@ class InOutwardContainter extends StatelessWidget {
                   ),
                 ],
               ),
+              Divider(),
+              
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("Net:", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Net:", style: TextStyle(fontWeight: FontWeight.bold, color: myAppTheme.kContainerTextColor)),
                   Text(
                     balanceAmount,
                     // "₦${manager.balance.toStringAsFixed(2)}",
                     style:
-                        manager.totalExpense > manager.totalIncome ||
-                            manager.totalLoan > manager.totalLoanRepayment
-                        ? outwardTextStyle
-                        : inwardTextStyle,
+                        // manager.totalExpense > manager.totalIncome ||
+                        //     manager.totalLoan > manager.totalLoanRepayment
+                        // ? outwardTextStyle
+                        // : inwardTextStyle,
+                         TextStyle(
+                      color:
+                          // manager.totalExpense >  manager.totalIncome ||
+                          //    manager.totalLoan > manager.totalLoanRepayment
+                          // ? Colors.red
+                          // : Colors.green,
+                          myAppTheme.kContainerTextColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),

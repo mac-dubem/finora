@@ -1,3 +1,4 @@
+import 'package:finora/constant.dart';
 import 'package:flutter/material.dart';
 
 class InputWidget extends StatelessWidget {
@@ -19,15 +20,19 @@ class InputWidget extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
+          color: myAppTheme.kContainerColor,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey),
+          // border: Border.all(color: Colors.grey),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
-            style: TextStyle(fontSize: 15),
+            style: TextStyle(fontSize: 15, color:  myAppTheme.kContainerTextColor),
+          
+            // cursorColor: myAppTheme.kHighlightColor,
+            
             decoration: InputDecoration(
               border: InputBorder.none,
               contentPadding: const EdgeInsets.only(bottom: 10),
