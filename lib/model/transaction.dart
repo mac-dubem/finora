@@ -9,6 +9,7 @@ class TransactionModel {
     final String? sheetId; // new: id of sheet this transaction belongs to
 
   TransactionModel({
+    // required this.folderID
     required this.category,
     required this.description,
     required this.amount,

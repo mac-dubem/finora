@@ -42,24 +42,25 @@ class _FinoraScreenState extends State<FinoraScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTransactions();
-  }
-
-  Future<void> _loadTransactions() async {
-    final sheetId = widget.sheetInfo?['id'] ?? '';
-    await manager.loadTransactionsForSheet(sheetId);
-    setState(() {});
+    // load transactions for this sheet (null/empty => load all)
+    // final String? sheetId = "1752418111447";
+    final String? sheetId = widget.sheetInfo?["id"] as String?;
+    manager.loadTransactionsForSheet(sheetId).then((_) {
+      setState(() {});
+    });
   }
   // ===============================================================================
 
   @override
   Widget build(BuildContext context) {
+    final String? sheetId = widget.sheetInfo?['id'] as String?;
     final sheetCurrency = widget.sheetInfo?['currency'] ?? "₦";
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Expense Tracker",
+          // "Expense Tracker",
+          widget.sheetInfo?['title'],
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -94,12 +95,6 @@ class _FinoraScreenState extends State<FinoraScreen> {
                     const Color(0xFF1E3A8A), // middle dark
                     const Color(0xFF192C6C), // bottom darker
                   ],
-
-                  // colors: [0xFF2563EB
-                  //   const Color(0xFF192C6C), // top darker
-                  //   const Color(0xFF1E3A8A),// middle dark
-                  //   const Color(0xFF3B82F6), // bottom darker
-                  // ],
                 ),
               ),
               child: Padding(
@@ -119,7 +114,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
                       ),
                     ),
                     Text(
-                      "$sheetCurrency${manager.balance.toStringAsFixed(2)}",
+                      "$sheetCurrency${manager.balance(sheetId).toStringAsFixed(2)}",
                       // "\$146,500.00",
                       // "₦${balance.toStringAsFixed(2)"}
                       style: TextStyle(
@@ -132,19 +127,20 @@ class _FinoraScreenState extends State<FinoraScreen> {
                     contaninerIncomeText(
                       title1: "Income",
                       amount1:
-                          "$sheetCurrency${manager.totalIncome.toStringAsFixed(2)}",
+                          "$sheetCurrency${manager.totalIncome(sheetId).toStringAsFixed(2)}",
 
+                      // "$sheetCurrency${manager.totalIncome.toStringAsFixed(2)}",
                       title2: "Expenses",
                       amount2:
-                          "$sheetCurrency${manager.totalExpense.toStringAsFixed(2)}",
+                          "$sheetCurrency${manager.totalExpense(sheetId).toStringAsFixed(2)}",
                     ),
                     contaninerIncomeText(
                       title1: "Loans Paid",
                       amount1:
-                          " $sheetCurrency${manager.totalLoanRepayment.toStringAsFixed(2)}",
+                          " $sheetCurrency${manager.totalLoanRepayment(sheetId).toStringAsFixed(2)}",
                       title2: "Loans Owed",
                       amount2:
-                          " $sheetCurrency${manager.totalLoan.toStringAsFixed(2)}",
+                          " $sheetCurrency${manager.totalLoan(sheetId).toStringAsFixed(2)}",
                     ),
                   ],
                 ),
@@ -233,6 +229,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
                   DropDownWidget(
                     selectedDrop: selectedCategory,
                     hintText: "Select Category",
+
                     dropdownList: [
                       "Foods & Dining",
                       "Transportation",
@@ -311,10 +308,6 @@ class _FinoraScreenState extends State<FinoraScreen> {
                   // =================================================================================
                   ActionButton(
                     onPress: () async {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(builder: (context) => ExpenseApp()),
-                      // );
                       if (amountController.text.isEmpty ||
                           selectedType == null ||
                           selectedCategory == null) {
@@ -338,7 +331,7 @@ class _FinoraScreenState extends State<FinoraScreen> {
                         amount: double.tryParse(amountController.text) ?? 0,
                         type: selectedType?.toLowerCase().trim() ?? '',
                         date: selectedDate ?? DateTime.now(),
-                        sheetId: sheetId,
+                        sheetId: sheetId.isNotEmpty ? sheetId : null,
                       );
 
                       if (sheetId.isNotEmpty) {
@@ -357,9 +350,11 @@ class _FinoraScreenState extends State<FinoraScreen> {
                       // Optionally clear fields after adding
                       amountController.clear();
                       descController.clear();
-                      selectedType = null;
-                      selectedCategory = null;
-                      selectedDate = null;
+                      setState(() {
+                        selectedType = null;
+                        selectedCategory = null;
+                        selectedDate = null;
+                      });
                     },
                   ),
                   // ==============================================================================
@@ -376,18 +371,22 @@ class _FinoraScreenState extends State<FinoraScreen> {
                     inwardTitle: "Loan Repayment",
                     outwardTitle: "Loan Owed",
                     inwardAmount:
-                        " $sheetCurrency${manager.totalLoanRepayment.toStringAsFixed(2)}",
+                        " $sheetCurrency${manager.totalLoanRepayment(sheetId).toStringAsFixed(2)}",
                     outwardAmount:
-                        " $sheetCurrency${manager.totalLoan.toStringAsFixed(2)}",
+                        " $sheetCurrency${manager.totalLoan(sheetId).toStringAsFixed(2)}",
                     balanceAmount:
-                        "$sheetCurrency${manager.outstandingLoan.toStringAsFixed(2)}",
+                        "$sheetCurrency${manager.outstandingLoan(sheetId).toStringAsFixed(2)}",
                   ),
-                  ...manager.transactions
+                  ...manager
+                      .transactionsFor(sheetId)
                       .where(
                         (val) => val.type == "loan" || val.type == "repayment",
                       )
                       .map((val) {
-                        return HistoryContainer(transaction: val);
+                        return HistoryContainer(
+                          transaction: val,
+                          currency: sheetCurrency,
+                        );
                       }),
                 ],
               ),
@@ -404,18 +403,22 @@ class _FinoraScreenState extends State<FinoraScreen> {
                     inwardTitle: "Income:",
                     outwardTitle: "Expense:",
                     inwardAmount:
-                        "$sheetCurrency${manager.totalIncome.toStringAsFixed(2)}",
+                        "$sheetCurrency${manager.totalIncome(sheetId).toStringAsFixed(2)}",
                     outwardAmount:
-                        "$sheetCurrency${manager.totalExpense.toStringAsFixed(2)}",
+                        "$sheetCurrency${manager.totalExpense(sheetId).toStringAsFixed(2)}",
                     balanceAmount:
-                        "$sheetCurrency${manager.balance.toStringAsFixed(2)}",
+                        "$sheetCurrency${manager.balance(sheetId).toStringAsFixed(2)}",
                   ),
-                  ...manager.transactions
+                  ...manager
+                      .transactionsFor(sheetId)
                       .where(
                         (val) => val.type == "income" || val.type == "expense",
                       )
                       .map((val) {
-                        return HistoryContainer(transaction: val);
+                        return HistoryContainer(
+                          transaction: val,
+                          currency: sheetCurrency,
+                        );
                       }),
                 ],
               ),

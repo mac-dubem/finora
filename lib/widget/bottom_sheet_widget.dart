@@ -98,12 +98,14 @@ class _NewSheetBottomPopupState extends State<NewSheetBottomPopup> {
             ),
             TextField(
               controller: titleController,
+              style: TextStyle(color: myAppTheme.kContainerTextColor),
               decoration: InputDecoration(
                 filled: true,
                 fillColor: myAppTheme.kContainerColor,
 
                 // TextAlign textAlign = TextAlign.center,
                 hintText: "Untited Sheet",
+
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide.none,
@@ -126,29 +128,30 @@ class _NewSheetBottomPopupState extends State<NewSheetBottomPopup> {
                   showCurrencyName: true,
                   showCurrencyCode: true,
                   theme: CurrencyPickerThemeData(
-                    backgroundColor: myAppTheme.kContainerColor,
+                    backgroundColor: myAppTheme.kBackgroundColor,
                     titleTextStyle: TextStyle(
                       color: myAppTheme.kContainerTextColor,
                     ),
-                    subtitleTextStyle: TextStyle(
-                      color: myAppTheme.kContainerTextColor,
-                    ),
+                    subtitleTextStyle: TextStyle(color: Colors.grey[600]),
+                    currencySignTextStyle: TextStyle(color: Colors.grey[600]),
                     // favorite: ['USD', 'EUR', 'NGN', 'GBP'],
                     inputDecoration: InputDecoration(
-                      labelText: "Search",
+                      contentPadding: EdgeInsets.all(8),
+                      hintText: "Search",
+                      hintStyle: TextStyle(color: Colors.grey[600]),
                       prefixIcon: Icon(Icons.search),
-                      fillColor: Colors.grey[900],
+                      fillColor: myAppTheme.kContainerColor,
                       filled: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none
+                        borderSide: BorderSide.none,
                       ),
                     ),
                   ),
                   onSelect: (Currency currency) {
                     setState(() {
                       selectedCurrency = currency;
-                        debugPrint('Selected currency: ${currency.code}');
+                      debugPrint('Selected currency: ${currency.code}');
                     });
                   },
                 );

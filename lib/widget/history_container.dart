@@ -7,12 +7,12 @@ import 'package:finora/model/transaction.dart';
 class HistoryContainer extends StatelessWidget {
   const HistoryContainer({
     required this.transaction,
-    // required this.currency,
+    required this.currency,
     super.key,
   });
 
   final TransactionModel transaction;
-  // final String currency;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class HistoryContainer extends StatelessWidget {
                     style: TextStyle(color: myAppTheme.kContainerTextColor),
                   ),
                   Text(
-                    "${transaction.type == "expense" || transaction.type == "loan" ? "-" : "+"}₦${transaction.amount.toStringAsFixed(2)}",
+                    "${transaction.type == "expense" || transaction.type == "loan" ? "-" : "+"}$currency${transaction.amount.toStringAsFixed(2)}",
                     style: TextStyle(
                       color:
                           transaction.type == "expense" ||

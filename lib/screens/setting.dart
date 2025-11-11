@@ -55,6 +55,31 @@ class _SettingPageState extends State<SettingPage> {
                 ],
               ),
             ),
+
+            SizedBox(height: 10),
+            reuseableSettingsBar(
+              child: Row(
+                spacing: 20,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.info_circle, color: Colors.grey[500]),
+                  Text(
+                    "App Icon",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: myAppTheme.kContainerTextColor,
+                    ),
+                  ),
+                  Spacer(),
+                  Icon(
+                    CupertinoIcons.right_chevron,
+                    size: 16,
+                    color: Colors.grey[700],
+                  ),
+                ],
+              ),
+            ),
             SizedBox(height: 10),
             // titleSection(title: "Currency"),
             GestureDetector(
@@ -82,13 +107,45 @@ class _SettingPageState extends State<SettingPage> {
                       ),
                     ),
                     Spacer(),
-                    Icon(CupertinoIcons.right_chevron, size: 16),
+                    Icon(
+                      CupertinoIcons.right_chevron,
+                      size: 16,
+                      color: Colors.grey[700],
+                    ),
                   ],
                 ),
               ),
             ),
 
             titleSection(title: "About"),
+
+            // ===============================================================
+            reuseableSettingsBar(
+              child: Row(
+                spacing: 20,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.info_circle, color: Colors.grey[500]),
+                  Text(
+                    "Privacy",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: myAppTheme.kContainerTextColor,
+                    ),
+                  ),
+                  Spacer(),
+                  Icon(
+                    CupertinoIcons.right_chevron,
+                    size: 16,
+                    color: Colors.grey[700],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            //  ==================================================================
+            // ============================================================
             reuseableSettingsBar(
               child: Row(
                 spacing: 20,
@@ -109,6 +166,51 @@ class _SettingPageState extends State<SettingPage> {
                     "1.0.0",
                     style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                   ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+
+            // ===============================================================
+            // ===============================================================
+            reuseableSettingsBar(
+              child: Row(
+                spacing: 20,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.info_circle, color: Colors.grey[500]),
+                  Text(
+                    "Rate the App",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: myAppTheme.kContainerTextColor,
+                    ),
+                  ),
+                  Spacer(),
+                  Icon(Icons.arrow_outward, size: 18, color: Colors.grey[700]),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            //  ==================================================================
+            // ===================================================================
+            reuseableSettingsBar(
+              child: Row(
+                spacing: 20,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.info_circle, color: Colors.grey[500]),
+                  Text(
+                    "Report a problem ",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: myAppTheme.kContainerTextColor,
+                    ),
+                  ),
+                  Spacer(),
+                  Icon(Icons.arrow_outward, size: 18, color: Colors.grey[700]),
                 ],
               ),
             ),
